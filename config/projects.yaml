@@ -1,0 +1,39 @@
+# =============================================================
+# Configuration de la base RAG
+# =============================================================
+# Modèle d'embeddings local (sentence-transformers).
+# Téléchargé une seule fois au premier run (~100 Mo pour MiniLM).
+# Alternatives :
+#   - sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2 (FR+EN)
+#   - jinaai/jina-embeddings-v2-base-code (orienté code)
+embedding_model: sentence-transformers/all-MiniLM-L6-v2
+
+# Dossier de persistance ChromaDB (relatif à CE fichier)
+database_path: ../data/chroma
+
+# Nom de la collection vectorielle
+collection: code_chunks
+
+chunking:
+  max_chars: 1600        # taille max d'un chunk
+  overlap_chars: 200     # recouvrement entre chunks
+  max_file_bytes: 200000 # fichiers plus gros ignorés
+  batch_size: 64         # taille des lots d'embeddings
+
+# =============================================================
+# Projets à indexer. Chemins relatifs à CE fichier ou absolus.
+# Chaque projet peut surcharger include / exclude (gitwildmatch).
+# =============================================================
+projects:
+  # Projet d'exemple fourni (supprimez-le une fois vos projets ajoutés)
+  - name: demo-api
+    path: ../samples/demo-api
+
+  # Exemples réels :
+  # - name: mon-backend
+  #   path: D:/wks/MonBackend
+  #   include: ["**/*.cs", "**/*.sql", "**/*.md"]
+  #   exclude: ["**/generated/**"]
+  #
+  # - name: mon-frontend
+  #   path: D:/wks/MonFrontend

@@ -1,0 +1,9 @@
+# Dépendances (miroir de pyproject.toml).
+# Installation recommandée :  pip install -e .[dev]
+# Installation directe :      pip install -r requirements.txt
+mcp[cli]>=2,<3
+chromadb>=0.6,<2
+sentence-transformers>=3.0
+pyyaml>=6.0
+pathspec>=0.12
+pytest>=8

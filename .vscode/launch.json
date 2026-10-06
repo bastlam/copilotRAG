@@ -1,0 +1,20 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "RAG : Ingestion",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "copilot_rag.ingest",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "RAG : Smoke test MCP",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/smoke_test.py",
+      "console": "integratedTerminal"
+    }
+  ]
+}
