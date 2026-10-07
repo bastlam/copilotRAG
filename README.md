@@ -28,7 +28,10 @@ py -3 -m venv .venv
 
 ## Configuration
 
-Éditez [config/projects.yaml](config/projects.yaml) et listez vos projets :
+Éditez [config/projects.yaml](config/projects.yaml) et listez vos projets.
+Deux sources possibles : un **dossier local** (`path`) ou l'**URL d'un dépôt git**
+(`git`), cloné une fois dans `data/repos` puis mis à jour automatiquement à
+chaque ingestion (clone shallow, `git` doit être sur le PATH) :
 
 ```yaml
 projects:
@@ -36,7 +39,14 @@ projects:
     path: D:/wks/MonBackend
     include: ["**/*.cs", "**/*.sql", "**/*.md"]   # optionnel
     exclude: ["**/generated/**"]                  # optionnel
+
+  - name: mon-frontend
+    git: https://github.com/mon-org/mon-frontend.git
+    ref: main                                     # optionnel : branche, tag ou commit
 ```
+
+> L'ingestion est incrémentale aussi pour les dépôts git : après le `fetch`,
+> seuls les fichiers dont le hash a changé sont ré-indexés.
 
 ## Ingestion
 
@@ -97,11 +107,12 @@ Des configurations de débogage sont fournies ([.vscode/launch.json](.vscode/lau
 ## Structure
 
 ```
-config/projects.yaml   # projets à indexer, modèle, chunking
-src/copilot_rag/       # config, chunker, embeddings, store, ingest, server
+config/projects.yaml   # projets à indexer (dossier local ou URL git), modèle, chunking
+src/copilot_rag/       # config, chunker, embeddings, store, gitsync, ingest, server
 scripts/               # ingest.ps1, smoke_test.py
 samples/demo-api/      # projet d'exemple indexé par défaut
 data/chroma/           # base vectorielle (générée, git-ignorée)
+data/repos/            # clones locaux des dépôts git (généré, git-ignoré)
 ```
 
 ## Références

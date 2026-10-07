@@ -11,6 +11,9 @@ embedding_model: sentence-transformers/all-MiniLM-L6-v2
 # Dossier de persistance ChromaDB (relatif à CE fichier)
 database_path: ../data/chroma
 
+# Cache local des dépôts clonés via la clé 'git:' (relatif à CE fichier)
+repos_cache: ../data/repos
+
 # Nom de la collection vectorielle
 collection: code_chunks
 
@@ -21,7 +24,11 @@ chunking:
   batch_size: 64         # taille des lots d'embeddings
 
 # =============================================================
-# Projets à indexer. Chemins relatifs à CE fichier ou absolus.
+# Projets à indexer. Deux sources possibles (mutuellement exclusives) :
+#   - path : dossier local, relatif à CE fichier ou absolu
+#   - git  : URL d'un dépôt cloné dans repos_cache puis mis à jour
+#            à chaque ingestion (clone shallow ; 'ref' optionnel :
+#            branche, tag ou commit)
 # Chaque projet peut surcharger include / exclude (gitwildmatch).
 # =============================================================
 projects:
@@ -36,4 +43,6 @@ projects:
   #   exclude: ["**/generated/**"]
   #
   # - name: mon-frontend
-  #   path: D:/wks/MonFrontend
+  #   git: https://github.com/mon-org/mon-frontend.git
+  #   ref: main
+  #   exclude: ["**/generated/**"]

@@ -14,8 +14,11 @@ Objectif : homogénéiser le code généré avec les patterns des projets exista
 - `src/copilot_rag/embeddings.py` : embeddings locaux via sentence-transformers
   (aucune clé API, vecteurs normalisés).
 - `src/copilot_rag/store.py` : persistance ChromaDB (`data/chroma`, similarité cosinus).
+- `src/copilot_rag/gitsync.py` : clone/mise à jour shallow des projets déclarés par
+  URL git (`git:` dans projects.yaml) dans `data/repos` ; exception typée `GitSyncError`.
 - `src/copilot_rag/ingest.py` : ingestion incrémentale (hash de fichier, purge des
-  fichiers supprimés). CLI : `python -m copilot_rag.ingest`.
+  fichiers supprimés). Un projet déclare soit `path` (dossier local) soit `git`
+  (URL, `ref` optionnelle) — synchronisé avant scan. CLI : `python -m copilot_rag.ingest`.
 - `src/copilot_rag/server.py` : serveur MCP stdio (`MCPServer` du SDK officiel),
   outils `search_code`, `find_similar_code`, `search_documentation`,
   `list_projects`, `index_stats`.

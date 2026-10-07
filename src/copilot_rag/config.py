@@ -37,9 +37,19 @@ class ChunkingConfig:
 @dataclass
 class ProjectConfig:
     name: str
-    path: Path
+    path: Path | None = None  # dossier local (mutuellement exclusif avec git)
+    git: str | None = None    # URL du dépôt à cloner/mettre à jour
+    ref: str | None = None    # branche, tag ou commit (défaut : branche principale)
     include: list[str] = field(default_factory=lambda: list(DEFAULT_INCLUDE))
     exclude: list[str] = field(default_factory=lambda: list(DEFAULT_EXCLUDE))
+
+    def resolve_path(self, repos_cache: Path) -> Path:
+        """Dossier local du projet : `path` direct, ou clone dans `repos_cache` pour git."""
+        if self.git:
+            return repos_cache / self.name
+        if self.path is None:  # garanti par load_config
+            raise ValueError(f"Projet '{self.name}' : ni 'path' ni 'git' défini")
+        return self.path
 
 
 @dataclass
@@ -47,6 +57,7 @@ class RagConfig:
     config_path: Path
     embedding_model: str
     database_path: Path
+    repos_cache: Path
     collection: str
     chunking: ChunkingConfig
     projects: list[ProjectConfig]
@@ -77,15 +88,29 @@ def load_config(path: Path | str | None = None) -> RagConfig:
     if not db_path.is_absolute():
         db_path = (base / db_path).resolve()
 
+    repos_cache = Path(raw.get("repos_cache", "../data/repos"))
+    if not repos_cache.is_absolute():
+        repos_cache = (base / repos_cache).resolve()
+
     projects: list[ProjectConfig] = []
     for p in raw.get("projects", []) or []:
-        ppath = Path(p["path"])
-        if not ppath.is_absolute():
-            ppath = (base / ppath).resolve()
+        git, ref, ppath = p.get("git"), p.get("ref"), p.get("path")
+        if bool(git) == bool(ppath):
+            raise ValueError(
+                f"Projet '{p.get('name', '?')}' : indiquer soit 'path' (dossier local) "
+                "soit 'git' (URL de dépôt), mais pas les deux."
+            )
+        path = None
+        if ppath:
+            path = Path(ppath)
+            if not path.is_absolute():
+                path = (base / path).resolve()
         projects.append(
             ProjectConfig(
                 name=p["name"],
-                path=ppath,
+                path=path,
+                git=git,
+                ref=ref,
                 include=list(p.get("include") or DEFAULT_INCLUDE),
                 exclude=[*DEFAULT_EXCLUDE, *(p.get("exclude") or [])],
             )
@@ -95,6 +120,7 @@ def load_config(path: Path | str | None = None) -> RagConfig:
         config_path=cfg_path,
         embedding_model=raw.get("embedding_model", "sentence-transformers/all-MiniLM-L6-v2"),
         database_path=db_path,
+        repos_cache=repos_cache,
         collection=raw.get("collection", "code_chunks"),
         chunking=chunking,
         projects=projects,

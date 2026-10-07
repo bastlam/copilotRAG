@@ -15,6 +15,7 @@ import sys
 from .chunker import chunk_file, file_hash, iter_project_files
 from .config import load_config
 from .embeddings import embed_texts
+from .gitsync import GitSyncError, sync_repo
 from .store import CodeStore
 
 
@@ -33,15 +34,25 @@ def ingest(
     for project in cfg.projects:
         if only_project and project.name != only_project:
             continue
-        if not project.path.is_dir():
-            print(f"[SKIP] {project.name} : dossier introuvable ({project.path})")
+
+        root = project.resolve_path(cfg.repos_cache)
+        if project.git:
+            try:
+                commit = sync_repo(project.git, root, project.ref)
+            except GitSyncError as exc:
+                print(f"[SKIP] {project.name} : {exc}")
+                continue
+            print(f"[GIT] {project.name} : {project.git} (commit {commit})")
+
+        if not root.is_dir():
+            print(f"[SKIP] {project.name} : dossier introuvable ({root})")
             continue
 
         seen: set[str] = set()
         pending = []
         scanned = unchanged = 0
 
-        for fpath, rel in iter_project_files(project.path, project.include, project.exclude):
+        for fpath, rel in iter_project_files(root, project.include, project.exclude):
             seen.add(rel)
             scanned += 1
             h = file_hash(fpath)
