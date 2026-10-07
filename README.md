@@ -94,6 +94,13 @@ configuration MCP utilisateur (Palette de commandes → `MCP: Open User Configur
 }
 ```
 
+### Obliger Copilot à exploiter la base dans un projet
+
+Copiez le modèle [templates/copilot-instructions.md](templates/copilot-instructions.md)
+dans `.github/copilot-instructions.md` du projet consommateur : il impose à Copilot
+de consulter la base RAG avant/après toute écriture de code et de s'aligner sur les
+patterns des projets indexés.
+
 ## Tests et vérifications
 
 ```powershell
